@@ -3,7 +3,7 @@ from datasets import Dataset
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, Trainer, TrainingArguments
 
 # Step 1: Load your JSON dataset
-with open('D:\\asmnt\\scraped_data.json', 'r') as f:
+with open('D:\\AI47LABS\\scraped_data.json', 'r') as f:
     data = json.load(f)
 
 # Step 2: Extract text from nested structure
@@ -82,16 +82,31 @@ trainer.save_model("./fine_tuned_gpt2")
 eval_results = trainer.evaluate()
 print(f"Evaluation results: {eval_results}")
 
-# Step 12: Inference - Testing the fine-tuned model
-# Example input text for generation
-input_text = "best hospital for cancer"
+# Step 12: Inference - Testing the fine-tuned model with hospital-related inputs
+input_texts = [
+    "top 10 hospitals for cardiac surgery",
+    "best hospitals for pediatric care",
+    "leading hospitals for oncology treatment",
+    "most advanced hospitals in neurosurgery",
+    "hospitals with the best patient satisfaction ratings"
+]
 
-# Tokenize the input text
-input_ids = tokenizer.encode(input_text, return_tensors='pt')
+# Generate and print outputs for each input text
+for i, input_text in enumerate(input_texts):
+    # Tokenize the input text
+    input_ids = tokenizer.encode(input_text, return_tensors='pt')
 
-# Generate text using the fine-tuned model
-output = model.generate(input_ids, max_length=100, num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
+    # Generate text using the fine-tuned model
+    output = model.generate(
+        input_ids, 
+        max_length=100, 
+        num_return_sequences=1, 
+        pad_token_id=tokenizer.eos_token_id,
+        do_sample=True,  # Enable sampling to get diverse outputs
+        top_k=50,        # Optional: Adjust top_k to control the sampling diversity
+        top_p=0.95       # Optional: Adjust top_p for nucleus sampling
+    )
 
-# Decode and print the output
-generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
-print(f"Generated text: {generated_text}")
+    # Decode and print the output
+    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
+    print(f"Generated text for input {i+1} ('{input_text}'): {generated_text}\n")
